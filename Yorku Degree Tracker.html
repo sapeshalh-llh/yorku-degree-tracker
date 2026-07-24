@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YorkU Degree Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#C8102E;--red-soft:#F9EAEC;--red-mid:#E8A0AC;
+  --ink:#1A1A2E;--slate:#4A5068;--mist:#F5F5F2;
+  --border:#E0E2EA;--white:#fff;
+  --green:#2D7A4F;--green-bg:#E8F5EE;
+  --amber:#B45309;--amber-bg:#FEF3C7;
+  --purple:#5B4FCF;--purple-bg:#EEECFB;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Manrope',sans-serif;background:var(--mist);color:var(--ink);min-height:100vh}
+
+/* NAV */
+nav{background:var(--ink);height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;position:sticky;top:0;z-index:200}
+.logo{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:-.2px}
+.logo span{color:var(--red-mid)}
+.nav-btns{display:flex;gap:10px}
+.nav-btn{padding:6px 16px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
+.nav-btn.ghost{background:transparent;border-color:#ffffff30;color:#fff}
+.nav-btn.ghost:hover{border-color:#fff;background:#ffffff15}
+.nav-btn.red{background:var(--red);color:#fff;border-color:var(--red)}
+.nav-btn.red:hover{background:#a80d25}
+
+/* SCREENS */
+.screen{display:none;max-width:1080px;margin:0 auto;padding:40px}
+.screen.active{display:block}
+
+/* HOME */
+#home{text-align:center;padding:80px 40px}
+.home-tag{display:inline-block;background:var(--red-soft);color:var(--red);font-size:.7rem;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;padding:4px 13px;border-radius:100px;margin-bottom:20px}
+#home h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:700;color:var(--ink);line-height:1.15;margin-bottom:16px}
+#home h1 span{color:var(--red)}
+#home>p{font-size:1rem;font-weight:300;color:var(--slate);max-width:540px;margin:0 auto 40px;line-height:1.75}
+.home-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:680px;margin:0 auto}
+.home-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:32px 28px;text-align:left;cursor:pointer;transition:all .15s}
+.home-card:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.07)}
+.home-card .icon{font-size:1.8rem;margin-bottom:14px}
+.home-card h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px}
+.home-card p{font-size:.82rem;font-weight:300;color:var(--slate);line-height:1.6}
+
+/* CARDS + FORMS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px}
+.card-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--ink);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.tag-label{font-size:.7rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);display:block;margin-bottom:10px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.three{grid-template-columns:1fr 1fr 1fr}
+.fg{margin-bottom:14px}
+label.lbl{display:block;font-size:.8rem;font-weight:600;color:var(--ink);margin-bottom:6px}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Manrope',sans-serif;font-size:.85rem;color:var(--ink);background:var(--mist);outline:none;transition:border-color .2s,background .2s;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--red);background:var(--white)}
+textarea{min-height:70px;resize:vertical}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#a80d25}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#246040}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--slate)}.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.btn-sm{padding:6px 14px;font-size:.76rem}
+.btn-danger{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5}.btn-danger:hover{background:#fecaca}
+
+/* PROGRAM LIST */
+.prog-list{display:flex;flex-direction:column;gap:10px}
+.prog-item{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:all .15s}
+.prog-item:hover{border-color:var(--red);background:var(--red-soft)}
+.prog-item-left h4{font-size:.9rem;font-weight:600;color:var(--ink)}
+.prog-item-left p{font-size:.75rem;color:var(--slate);font-weight:300;margin-top:2px}
+.prog-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.6px}
+.badge-fac{background:var(--purple-bg);color:var(--purple)}
+.badge-yr{background:var(--amber-bg);color:var(--amber)}
+.badge-count{background:var(--green-bg);color:var(--green)}
+.prog-item-right{display:flex;gap:8px;flex-shrink:0}
+
+/* COURSE TABLE */
+.course-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.course-table th{background:var(--mist);padding:9px 14px;text-align:left;font-size:.7rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border)}
+.course-table td{padding:10px 14px;border-bottom:1px solid #f0f1f4;vertical-align:middle}
+.course-table tr:last-child td{border-bottom:none}
+.course-table tr:hover td{background:#fafafa}
+.code-cell{font-weight:700;color:var(--red);font-size:.78rem}
+.type-pill{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:100px;text-transform:uppercase}
+.type-required{background:#fee2e2;color:#b91c1c}
+.type-elective{background:var(--purple-bg);color:var(--purple)}
+.type-general{background:var(--amber-bg);color:var(--amber)}
+
+/* YEAR SECTIONS in editor */
+.year-section{margin-bottom:18px}
+.year-section-head{background:var(--mist);border:1px solid var(--border);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.year-section-head h4{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700}
+.year-section-body{border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:14px}
+
+/* STUDENT TRACKER */
+.tracker-header{background:var(--white);border-bottom:1px solid var(--border);padding:22px 40px 0}
+.tracker-top{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding-bottom:16px}
+.tracker-info h2{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700}
+.tracker-info p{font-size:.78rem;color:var(--slate);font-weight:300;margin-top:2px}
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.stat-box{background:var(--mist);border:1px solid var(--border);border-radius:10px;padding:9px 15px;text-align:center}
+.stat-box .n{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;display:block}
+.stat-box .l{font-size:.65rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.7px}
+.stat-box.done .n{color:var(--green)}
+.stat-box.left .n{color:var(--red)}
+.prog-bar-wrap{max-width:1080px;margin:0 auto;padding:12px 0 16px}
+.bar-top{display:flex;justify-content:space-between;font-size:.72rem;font-weight:600;color:var(--slate);margin-bottom:5px}
+.bar-out{height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-in{height:100%;background:linear-gradient(90deg,var(--red),#e84d6a);border-radius:4px;transition:width .5s}
+
+/* YEAR TABS */
+.ytabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.ytab{padding:7px 18px;border-radius:100px;border:1.5px solid var(--border);background:var(--white);font-family:'Manrope',sans-serif;font-size:.8rem;font-weight:600;color:var(--slate);cursor:pointer;transition:all .15s}
+.ytab:hover{border-color:var(--red);color:var(--red)}
+.ytab.active{background:var(--red);color:#fff;border-color:var(--red)}
+.ytab.complete{border-color:var(--green);color:var(--green)}
+.ytab.complete.active{background:var(--green);border-color:var(--green);color:#fff}
+.ypanel{display:none}.ypanel.active{display:block}
+.ypanel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.ypanel-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700}
+.yr-badge{font-size:.72rem;font-weight:600;padding:4px 11px;border-radius:100px}
+.yr-done{background:var(--green-bg);color:var(--green)}
+.yr-now{background:var(--amber-bg);color:var(--amber)}
+.yr-up{background:var(--mist);color:var(--slate);border:1px solid var(--border)}
+
+/* SEM GRID */
+.sem-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sem-card{background:var(--white);border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.sem-head{background:var(--mist);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.75rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.7px}
+.sem-done-count{font-size:.67rem;font-weight:700;color:var(--green);background:var(--green-bg);padding:2px 8px;border-radius:100px}
+.c-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f1f4;cursor:pointer;transition:background .12s}
+.c-item:last-child{border-bottom:none}
+.c-item:hover{background:var(--mist)}
+.c-item.done{background:var(--green-bg)}
+.c-item.done:hover{background:#d9eee3}
+.c-check{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--white)}
+.c-item.done .c-check{background:var(--green);border-color:var(--green)}
+.ck{display:none;color:#fff;font-size:.65rem;font-weight:700}
+.c-item.done .ck{display:block}
+.c-info{flex:1}
+.c-code{font-size:.72rem;font-weight:700;color:var(--red);display:block;margin-bottom:1px}
+.c-item.done .c-code{color:var(--green)}
+.c-name{font-size:.83rem;color:var(--ink);line-height:1.35}
+.c-item.done .c-name{text-decoration:line-through;color:var(--slate)}
+.c-cr{font-size:.67rem;font-weight:600;color:#aab;flex-shrink:0;margin-top:3px}
+.c-type-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.dot-required{background:var(--red)}
+.dot-elective{background:var(--purple)}
+.dot-general{background:var(--amber)}
+
+/* SUMMER ROW */
+.summer-row{margin-top:14px}
+.summer-card{background:var(--white);border:1px solid var(--border);border-radius:13px;overflow:hidden}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--slate)}
+.empty .e-icon{font-size:2.5rem;margin-bottom:12px}
+.empty p{font-size:.88rem;font-weight:300;line-height:1.7}
+
+/* SEARCH */
+.search-bar{display:flex;gap:10px;margin-bottom:20px}
+.search-bar input{flex:1}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:36px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-size:.75rem;font-weight:500;color:var(--slate)}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* MISSING */
+.missing-section{background:var(--red-soft);border:1px solid var(--red-mid);border-radius:13px;padding:20px;margin-top:16px}
+.missing-section h4{font-size:.85rem;font-weight:700;color:var(--red);margin-bottom:10px}
+.missing-item{font-size:.8rem;color:var(--slate);padding:4px 0;border-bottom:1px solid #f0c0c8;display:flex;gap:8px}
+.missing-item:last-child{border-bottom:none}
+.missing-code{font-weight:700;color:var(--red);min-width:90px}
+
+@media(max-width:768px){
+  nav{padding:0 20px}
+  .screen{padding:24px 16px}
+  .home-cards{grid-template-columns:1fr}
+  .sem-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .form-row.three{grid-template-columns:1fr}
+  .tracker-header{padding:18px 16px 0}
+  .stats-row{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">YorkU <span>Degree Tracker</span></div>
+  <div class="nav-btns">
+    <button class="nav-btn ghost" onclick="show('home')">Home</button>
+    <button class="nav-btn ghost" onclick="show('admin')">⚙ Admin</button>
+    <button class="nav-btn red" onclick="showStudent()">My Tracker</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="screen active" style="max-width:1080px">
+  <div class="home-tag">York University · Toronto</div>
+  <h1>Track your degree.<br><span>Stay on track.</span></h1>
+  <p>A course-by-course tracker for York University students. See exactly what you've completed, what's left, and what you're missing — every year, every semester.</p>
+  <div class="home-cards">
+    <div class="home-card" onclick="show('admin')">
+      <div class="icon">⚙️</div>
+      <h3>Admin — Set Up Programs</h3>
+      <p>Add York programs and enter their real course requirements year by year. Set up once, students use it forever.</p>
+    </div>
+    <div class="home-card" onclick="showStudent()">
+      <div class="icon">🎓</div>
+      <h3>Student — Track My Degree</h3>
+      <p>Select your program, enter your start year, and check off courses as you complete them.</p>
+    </div>
+    <div class="home-card" onclick="show('browse')">
+      <div class="icon">📚</div>
+      <h3>Browse Programs</h3>
+      <p>See all programs that have been set up, their course requirements, and credit totals.</p>
+    </div>
+    <div class="home-card" onclick="show('student')">
+      <div class="icon">🔍</div>
+      <h3>What Am I Missing?</h3>
+      <p>See a clear list of every course you haven't checked off yet, sorted by year and type.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin" class="screen">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <div>
+      <div class="tag-label">Admin Panel</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700">Manage Programs & Courses</h2>
+    </div>
+    <button class="btn btn-red" onclick="openAddProg()">+ Add Program</button>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <div class="search-bar">
+      <input type="text" id="prog-search" placeholder="Search programs..." oninput="renderProgList()"/>
+      <select id="fac-filter" onchange="renderProgList()">
+        <option value="">All Faculties</option>
+        <option>Faculty of Health</option>
+        <option>Lassonde School of Engineering</option>
+        <option>Faculty of Liberal Arts & Professional Studies</option>
+        <option>Faculty of Science</option>
+        <option>Schulich School of Business</option>
+        <option>Faculty of Environmental & Urban Change</option>
+        <option>School of the Arts, Media, Performance & Design</option>
+        <option>Glendon College</option>
+        <option>Faculty of Education</option>
+        <option>Osgoode Hall Law School</option>
+      </select>
+    </div>
+    <div id="prog-list" class="prog-list">
+      <div class="empty"><div class="e-icon">📋</div><p>No programs added yet.<br>Click <strong>+ Add Program</strong> to get started.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE SCREEN -->
+<div id="browse" class="screen">
+  <div class="tag-label">All Programs</div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:22px">Browse York Programs</h2>
+  <div class="search-bar">
+    <input type="text" id="browse-search" placeholder="Search programs..." oninput="renderBrowse()"/>
+    <select id="browse-fac" onchange="renderBrowse()">
+      <option value="">All Faculties</option>
+      <option>Faculty of Health</option>
+      <option>Lassonde School of Engineering</option>
+      <option>Faculty of Liberal Arts & Professional Studies</option>
+      <option>Faculty of Science</option>
+      <option>Schulich School of Business</option>
+      <option>Faculty of Environmental & Urban Change</option>
+      <option>School of the Arts, Media, Performance & Design</option>
+      <option>Glendon College</option>
+      <option>Faculty of Education</option>
+      <option>Osgoode Hall Law School</option>
+    </select>
+  </div>
+  <div id="browse-list" class="prog-list"></div>
+</div>
+
+<!-- STUDENT SETUP -->
+<div id="student-setup" class="screen">
+  <div style="max-width:560px;margin:0 auto">
+    <div class="tag-label">Student Tracker</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Set up your tracker</h2>
+    <p style="font-size:.88rem;font-weight:300;color:var(--slate);margin-bottom:28px;line-height:1.7">Select your program and we'll build your personalized degree checklist.</p>
+    <div class="card">
+      <div class="fg">
+        <label class="lbl">Your First Name</label>
+        <input type="text" id="stu-name" placeholder="e.g. Sapesha"/>
+      </div>
+      <div class="fg">
+        <label class="lbl">Your Program</label>
+        <select id="stu-prog">
+          <option value="">— Select your program —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="fg" style="margin:0">
+          <label class="lbl">Year You Started</label>
+          <select id="stu-start">
+            <option>2020</option><option>2021</option><option>2022</option>
+            <option>2023</option><option>2024</option><option selected>2025</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label class="lbl">Current Year of Study</label>
+          <select id="stu-year">
+            <option value="1">1st Year</option>
+            <option value="2" selected>2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-red" style="width:100%;margin-top:8px;justify-content:center" onclick="buildTracker()">Build my tracker →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT TRACKER -->
+<div id="student" class="screen" style="padding:0">
+  <div class="tracker-header">
+    <div class="tracker-top">
+      <div class="tracker-info">
+        <h2 id="t-name"></h2>
+        <p id="t-detail"></p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box done"><span class="n" id="t-done">0</span><span class="l">Done</span></div>
+        <div class="stat-box left"><span class="n" id="t-left">0</span><span class="l">Left</span></div>
+        <div class="stat-box"><span class="n" id="t-cr">0</span><span class="l">Credits</span></div>
+        <div class="stat-box"><span class="n" id="t-req">0</span><span class="l">Required</span></div>
+        <button class="btn btn-ghost btn-sm" onclick="showMissing()">📋 Missing</button>
+        <button class="btn btn-ghost btn-sm" onclick="showStudent()">↩ Change</button>
+      </div>
+    </div>
+    <div class="prog-bar-wrap">
+      <div class="bar-top"><span>Degree Progress</span><span id="t-pct">0%</span></div>
+      <div class="bar-out"><div class="bar-in" id="t-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div style="max-width:1080px;margin:0 auto;padding:28px 40px 60px">
+    <div class="legend">
+      <span class="leg-item"><span class="leg-dot" style="background:var(--red)"></span>Required</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--purple)"></span>Elective</span>
+      <span class="leg-item"><span class="leg-dot" style="background:var(--amber)"></span>General Education</span>
+    </div>
+    <div class="ytabs" id="ytabs"></div>
+    <div id="ypanels"></div>
+  </div>
+</div>
+
+<!-- MISSING MODAL -->
+<div class="overlay" id="missing-overlay" onclick="if(event.target===this)closeMissing()">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-title">📋 Courses Still Needed</div>
+    <div id="missing-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeMissing()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PROGRAM MODAL -->
+<div class="overlay" id="add-prog-overlay" onclick="if(event.target===this)closeAddProg()">
+  <div class="modal">
+    <div class="modal-title" id="prog-modal-title">Add New Program</div>
+    <div class="form-row">
+      <div class="fg" style="margin:0">
+        <label class="lbl">Program Name</label>
+        <input type="text" id="pm-name" placeholder="e.g. Health Studies"/>
+      </div>
+      <div class="fg" style="margin:0">
+        <label class="lbl">Degree (BHS, BA, BSc...)</label>
+        <input type="text" id="pm-degree" placeholder="e.g. BHS"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Faculty</label>
+      <select id="pm-fac">
+        <option>Faculty of Health</option>
+        <option>Lassonde School of Engineering</option>
+        <option>Faculty of Liberal Arts & Professional Studies</option>
+        <option>Faculty of Science</option>
+        <option>Schulich School of Business</option>
+        <option>Faculty of Environmental & Urban Change</option>
+        <option>School of the Arts, Media, Performance & Design</option>
+        <option>Glendon College</option>
+        <option>Faculty of Education</option>
+        <option>Osgoode Hall Law School</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="lbl">Total Credits Required</label>
+      <input type="number" id="pm-credits" placeholder="e.g. 120" value="120"/>
+    </div>
+    <div class="fg">
+      <label class="lbl">Notes (optional)</label>
+      <textarea id="pm-notes" placeholder="e.g. Co-op available. Must maintain 5.0 GPA for honours."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddProg()">Cancel</button>
+      <button class="btn btn-red" onclick="saveProg()">Save Program →</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROGRAM / COURSES MODAL -->
+<div class="overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="modal" style="max-width:800px">
+    <div class="modal-title" id="edit-title">Edit Program Courses</div>
+
+    <div style="margin-bottom:18px">
+      <p style="font-size:.82rem;font-weight:300;color:var(--slate);line-height:1.65">Add courses year by year and semester. Set the type: <strong>Required</strong> (must take), <strong>Elective</strong> (choose from options), or <strong>General Education</strong>.</p>
+    </div>
+
+    <div id="year-editors"></div>
+
+    <div style="background:var(--mist);border-radius:10px;padding:16px;margin-bottom:4px">
+      <div style="font-size:.8rem;font-weight:700;color:var(--slate);margin-bottom:12px;text-transform:uppercase;letter-spacing:.7px">➕ Add a Course</div>
+      <div class="form-row three">
+        <div class="fg" style="margin:0">
+          <label class="lbl">Course Code</label>
+          <input type="text" id="nc-code" placeholder="e.g. HLST 1010"/>
+        </div>
+        <div class="fg" style="margin:0">
+          <label class="lbl">Course Name</label>
+          <input type="text" id="nc-name" placeholder="e.g. Intro to Health Studies"/>
+        </div>
+        <div class="fg" style="margin:0">
+          <label class="lbl">Credits</label>
+          <input type="number" id="nc-cr" value="3" min="1" max="9"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg" style="margin:0">
+          <label class="lbl">Year</label>
+          <select id="nc-yr">
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>
+            <option value="3">Year 3</option>
+            <option value="4">Year 4</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label class="lbl">Semester</label>
+          <select id="nc-sem">
+            <option value="fall">Fall</option>
+            <option value="winter">Winter</option>
+            <option value="summer">Summer</option>
+            <option value="full">Full Year</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label class="lbl">Type</label>
+          <select id="nc-type">
+            <option value="required">Required</option>
+            <option value="elective">Elective</option>
+            <option value="general">General Education</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Notes (optional — e.g. "Choose 1 of: HLST 3010 or HLST 3020")</label>
+        <input type="text" id="nc-note" placeholder="Optional note"/>
+      </div>
+      <button class="btn btn-red" onclick="addCourse()">+ Add Course</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEdit()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW PROGRAM MODAL -->
+<div class="overlay" id="view-overlay" onclick="if(event.target===this)closeView()">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-title" id="view-title"></div>
+    <div id="view-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeView()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────
+let programs = [];
+let studentState = {};
+let editingProgId = null;
+
+// ── STORAGE ───────────────────────────────────────
+function save(){ localStorage.setItem('yu-programs', JSON.stringify(programs)); }
+function load(){
+  try { programs = JSON.parse(localStorage.getItem('yu-programs') || '[]'); } catch(e){ programs=[]; }
+  try { studentState = JSON.parse(localStorage.getItem('yu-student') || '{}'); } catch(e){ studentState={}; }
+}
+function saveStudent(){ localStorage.setItem('yu-student', JSON.stringify(studentState)); }
+
+// ── HELPERS ───────────────────────────────────────
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function toast(msg,ms=2200){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='admin') renderProgList();
+  if(id==='browse') renderBrowse();
+}
+
+// ── SCREENS ───────────────────────────────────────
+function showStudent(){
+  const sel = document.getElementById('stu-prog');
+  sel.innerHTML='<option value="">— Select your program —</option>';
+  programs.forEach(p=>{
+    const o=document.createElement('option');
+    o.value=p.id; o.textContent=p.name+' ('+p.degree+')';
+    sel.appendChild(o);
+  });
+  if(studentState.progId){
+    sel.value = studentState.progId;
+    document.getElementById('stu-name').value = studentState.name||'';
+    document.getElementById('stu-start').value = studentState.startYr||'2025';
+    document.getElementById('stu-year').value = studentState.curYr||'2';
+  }
+  show('student-setup');
+}
+
+// ── PROGRAM CRUD ──────────────────────────────────
+function openAddProg(){
+  editingProgId=null;
+  document.getElementById('prog-modal-title').textContent='Add New Program';
+  ['pm-name','pm-degree','pm-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pm-credits').value=120;
+  document.getElementById('pm-fac').value='Faculty of Health';
+  document.getElementById('add-prog-overlay').classList.add('open');
+}
+function closeAddProg(){ document.getElementById('add-prog-overlay').classList.remove('open'); }
+
+function saveProg(){
+  const name=document.getElementById('pm-name').value.trim();
+  const degree=document.getElementById('pm-degree').value.trim();
+  const fac=document.getElementById('pm-fac').value;
+  const credits=parseInt(document.getElementById('pm-credits').value)||120;
+  const notes=document.getElementById('pm-notes').value.trim();
+  if(!name||!degree){ toast('Please enter program name and degree.'); return; }
+  if(editingProgId){
+    const p=programs.find(x=>x.id===editingProgId);
+    if(p){ p.name=name;p.degree=degree;p.faculty=fac;p.credits=credits;p.notes=notes; }
+  } else {
+    programs.push({id:uid(),name,degree,faculty:fac,credits,notes,courses:[]});
+  }
+  save(); closeAddProg(); renderProgList(); toast(editingProgId?'Program updated!':'Program added!');
+}
+
+function editProg(id){
+  const p=programs.find(x=>x.id===id); if(!p) return;
+  editingProgId=id;
+  document.getElementById('prog-modal-title').textContent='Edit Program';
+  document.getElementById('pm-name').value=p.name;
+  document.getElementById('pm-degree').value=p.degree;
+  document.getElementById('pm-fac').value=p.faculty;
+  document.getElementById('pm-credits').value=p.credits;
+  document.getElementById('pm-notes').value=p.notes||'';
+  document.getElementById('add-prog-overlay').classList.add('open');
+}
+
+function deleteProg(id){
+  if(!confirm('Delete this program and all its courses?')) return;
+  programs=programs.filter(x=>x.id!==id);
+  save(); renderProgList(); toast('Program deleted.');
+}
+
+function viewProg(id){
+  const p=programs.find(x=>x.id===id); if(!p) return;
+  document.getElementById('view-title').textContent=p.name+' ('+p.degree+')';
+  let html='<p style="font-size:.8rem;color:var(--slate);margin-bottom:16px;font-weight:300">'+p.faculty+' · '+p.credits+' total credits'+(p.notes?' · '+p.notes:'')+'</p>';
+  for(let y=1;y<=4;y++){
+    const yc=p.courses.filter(c=>c.year==y);
+    if(!yc.length) continue;
+    html+='<div style="margin-bottom:16px"><div style="font-family:Syne,sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;color:var(--ink)">Year '+y+'</div>';
+    ['fall','winter','summer','full'].forEach(sem=>{
+      const sc=yc.filter(c=>c.sem===sem);
+      if(!sc.length) return;
+      const semNames={fall:'🍂 Fall',winter:'❄️ Winter',summer:'☀️ Summer',full:'📅 Full Year'};
+      html+='<div style="font-size:.72rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;margin-top:10px">'+semNames[sem]+'</div>';
+      html+='<table class="course-table"><thead><tr><th>Code</th><th>Course Name</th><th>Credits</th><th>Type</th><th>Notes</th></tr></thead><tbody>';
+      sc.forEach(c=>{
+        const tp=c.type==='required'?'type-required':c.type==='elective'?'type-elective':'type-general';
+        html+=`<tr><td class="code-cell">${c.code}</td><td>${c.name}</td><td>${c.cr}</td><td><span class="type-pill ${tp}">${c.type}</span></td><td style="font-size:.72rem;color:var(--slate)">${c.note||''}</td></tr>`;
+      });
+      html+='</tbody></table>';
+    });
+    html+='</div>';
+  }
+  if(!p.courses.length) html+='<div class="empty"><div class="e-icon">📭</div><p>No courses added yet. Use the Admin panel to add courses.</p></div>';
+  document.getElementById('view-content').innerHTML=html;
+  document.getElementById('view-overlay').classList.add('open');
+}
+function closeView(){ document.getElementById('view-overlay').classList.remove('open'); }
+
+// ── COURSE EDITOR ─────────────────────────────────
+function openEdit(id){
+  const p=programs.find(x=>x.id===id); if(!p) return;
+  editingProgId=id;
+  document.getElementById('edit-title').textContent='Courses — '+p.name;
+  renderYearEditors(p);
+  document.getElementById('edit-overlay').classList.add('open');
+}
+function closeEdit(){ document.getElementById('edit-overlay').classList.remove('open'); renderProgList(); }
+
+function renderYearEditors(p){
+  let html='';
+  for(let y=1;y<=4;y++){
+    const yc=p.courses.filter(c=>c.year==y);
+    html+=`<div class="year-section">
+      <div class="year-section-head"><h4>Year ${y}</h4><span style="font-size:.75rem;color:var(--slate);font-weight:300">${yc.length} course${yc.length!==1?'s':''}</span></div>
+      <div class="year-section-body">`;
+    if(yc.length){
+      html+='<table class="course-table" style="margin-bottom:0"><thead><tr><th>Code</th><th>Name</th><th>Cr</th><th>Sem</th><th>Type</th><th>Note</th><th></th></tr></thead><tbody>';
+      yc.forEach(c=>{
+        const tp=c.type==='required'?'type-required':c.type==='elective'?'type-elective':'type-general';
+        html+=`<tr><td class="code-cell">${c.code}</td><td>${c.name}</td><td>${c.cr}</td><td style="text-transform:capitalize">${c.sem}</td><td><span class="type-pill ${tp}">${c.type}</span></td><td style="font-size:.72rem;color:var(--slate);max-width:120px">${c.note||''}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteCourse('${c.id}')">✕</button></td></tr>`;
+      });
+      html+='</tbody></table>';
+    } else {
+      html+='<p style="font-size:.8rem;color:var(--slate);font-weight:300;text-align:center;padding:12px 0">No courses for Year '+y+' yet.</p>';
+    }
+    html+='</div></div>';
+  }
+  document.getElementById('year-editors').innerHTML=html;
+}
+
+function addCourse(){
+  const p=programs.find(x=>x.id===editingProgId); if(!p) return;
+  const code=document.getElementById('nc-code').value.trim();
+  const name=document.getElementById('nc-name').value.trim();
+  const cr=parseInt(document.getElementById('nc-cr').value)||3;
+  const yr=parseInt(document.getElementById('nc-yr').value);
+  const sem=document.getElementById('nc-sem').value;
+  const type=document.getElementById('nc-type').value;
+  const note=document.getElementById('nc-note').value.trim();
+  if(!code||!name){ toast('Please enter course code and name.'); return; }
+  p.courses.push({id:uid(),code,name,cr,year:yr,sem,type,note});
+  save(); renderYearEditors(p);
+  ['nc-code','nc-name','nc-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nc-cr').value=3;
+  toast('Course added!');
+}
+
+function deleteCourse(cid){
+  const p=programs.find(x=>x.id===editingProgId); if(!p) return;
+  p.courses=p.courses.filter(c=>c.id!==cid);
+  save(); renderYearEditors(p); toast('Course removed.');
+}
+
+// ── RENDER PROGRAM LIST ───────────────────────────
+function renderProgList(){
+  const q=(document.getElementById('prog-search')?.value||'').toLowerCase();
+  const fac=document.getElementById('fac-filter')?.value||'';
+  const el=document.getElementById('prog-list');
+  let list=programs.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    if(fac && p.faculty!==fac) return false;
+    return true;
+  });
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="e-icon">📋</div><p>No programs found.<br>'+( programs.length?'Try a different search.':'Click <strong>+ Add Program</strong> to get started.')+'</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(p=>`
+    <div class="prog-item">
+      <div class="prog-item-left">
+        <h4>${p.name}</h4>
+        <div class="prog-badges">
+          <span class="badge badge-fac">${p.faculty.split(' ').slice(-2).join(' ')}</span>
+          <span class="badge badge-yr">${p.degree}</span>
+          <span class="badge badge-count">${p.courses.length} courses</span>
+          <span class="badge" style="background:var(--mist);color:var(--slate)">${p.credits} credits</span>
+        </div>
+      </div>
+      <div class="prog-item-right">
+        <button class="btn btn-ghost btn-sm" onclick="viewProg('${p.id}')">👁 View</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEdit('${p.id}')">✏️ Courses</button>
+        <button class="btn btn-ghost btn-sm" onclick="editProg('${p.id}')">⚙ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProg('${p.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderBrowse(){
+  const q=(document.getElementById('browse-search')?.value||'').toLowerCase();
+  const fac=document.getElementById('browse-fac')?.value||'';
+  const el=document.getElementById('browse-list');
+  let list=programs.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    if(fac && p.faculty!==fac) return false;
+    return true;
+  });
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="e-icon">📚</div><p>No programs found.</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(p=>`
+    <div class="prog-item" onclick="viewProg('${p.id}')">
+      <div class="prog-item-left">
+        <h4>${p.name}</h4>
+        <div class="prog-badges">
+          <span class="badge badge-fac">${p.faculty.split(' ').slice(-2).join(' ')}</span>
+          <span class="badge badge-yr">${p.degree}</span>
+          <span class="badge badge-count">${p.courses.length} courses · ${p.credits} credits</span>
+        </div>
+        ${p.notes?`<p style="font-size:.75rem;font-weight:300;color:var(--slate);margin-top:4px">${p.notes}</p>`:''}
+      </div>
+      <div class="prog-item-right"><button class="btn btn-ghost btn-sm">View →</button></div>
+    </div>`).join('');
+}
+
+// ── STUDENT TRACKER BUILD ─────────────────────────
+function buildTracker(){
+  const name=document.getElementById('stu-name').value.trim()||'Student';
+  const pid=document.getElementById('stu-prog').value;
+  const startYr=parseInt(document.getElementById('stu-start').value);
+  const curYr=parseInt(document.getElementById('stu-year').value);
+  if(!pid){ toast('Please select your program.'); return; }
+  const prog=programs.find(x=>x.id===pid); if(!prog) return;
+
+  // preserve checked state if same program
+  let chk={};
+  if(studentState.progId===pid && studentState.chk) chk=studentState.chk;
+
+  studentState={name,progId:pid,startYr,curYr,chk};
+  saveStudent();
+  renderTracker();
+  show('student');
+}
+
+function renderTracker(){
+  const {name,progId,startYr,curYr,chk}=studentState;
+  const prog=programs.find(x=>x.id===progId); if(!prog) return;
+
+  document.getElementById('t-name').textContent=name+"'s Degree Tracker";
+  document.getElementById('t-detail').textContent=prog.name+' ('+prog.degree+') · '+prog.faculty+' · Started '+startYr;
+
+  const tabs=document.getElementById('ytabs');
+  const panels=document.getElementById('ypanels');
+  tabs.innerHTML=''; panels.innerHTML='';
+
+  const ynames=['1st Year','2nd Year','3rd Year','4th Year'];
+
+  for(let y=1;y<=4;y++){
+    const yc=prog.courses.filter(c=>c.year==y);
+    const doneC=yc.filter(c=>chk[c.id]).length;
+    const complete=yc.length>0&&doneC===yc.length;
+
+    const tab=document.createElement('button');
+    tab.className='ytab'+(y===1?' active':'')+(complete?' complete':'');
+    tab.textContent=ynames[y-1]+' ('+(startYr+y-1)+'–'+(startYr+y)+')';
+    tab.id='yt'+y; tab.onclick=()=>swYear(y);
+    tabs.appendChild(tab);
+
+    let badge='';
+    if(y<curYr) badge='<span class="yr-badge yr-done">✓ Completed</span>';
+    else if(y==curYr) badge='<span class="yr-badge yr-now">📍 Current Year</span>';
+    else badge='<span class="yr-badge yr-up">Upcoming</span>';
+
+    const panel=document.createElement('div');
+    panel.className='ypanel'+(y===1?' active':'');
+    panel.id='yp'+y;
+
+    const sems=['fall','winter','summer','full'];
+    const semLabels={fall:'🍂 Fall Semester',winter:'❄️ Winter Semester',summer:'☀️ Summer',full:'📅 Full Year'};
+
+    let semHtml='<div class="sem-grid">';
+    let addedSems=0;
+    sems.forEach(s=>{
+      const sc=yc.filter(c=>c.sem===s);
+      if(!sc.length) return;
+      addedSems++;
+      const sDone=sc.filter(c=>chk[c.id]).length;
+      semHtml+=`<div class="sem-card">
+        <div class="sem-head">${semLabels[s]}<span class="sem-done-count">${sDone}/${sc.length}</span></div>
+        <div>`;
+      sc.forEach(c=>{
+        const d=chk[c.id]?'done':'';
+        const dotCls=c.type==='required'?'dot-required':c.type==='elective'?'dot-elective':'dot-general';
+        semHtml+=`<div class="c-item ${d}" onclick="toggleCourse('${c.id}','${y}')">
+          <div class="c-type-dot ${dotCls}"></div>
+          <div class="c-check"><span class="ck">✓</span></div>
+          <div class="c-info">
+            <span class="c-code">${c.code}</span>
+            <span class="c-name">${c.name}${c.note?'<span style="font-size:.7rem;color:var(--slate);display:block;font-weight:300">'+c.note+'</span>':''}</span>
+          </div>
+          <span class="c-cr">${c.cr}cr</span>
+        </div>`;
+      });
+      semHtml+='</div></div>';
+    });
+    semHtml+='</div>';
+
+    if(!addedSems) semHtml='<div class="empty"><div class="e-icon">📭</div><p>No courses set up for Year '+y+' yet.</p></div>';
+
+    panel.innerHTML=`<div class="ypanel-head"><div class="ypanel-title">${ynames[y-1]} — ${startYr+y-1} / ${startYr+y}</div>${badge}</div>${semHtml}`;
+    panels.appendChild(panel);
+  }
+  updateStats();
+}
+
+function swYear(y){
+  document.querySelectorAll('.ytab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ypanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('yt'+y)?.classList.add('active');
+  document.getElementById('yp'+y)?.classList.add('active');
+}
+
+function toggleCourse(cid,y){
+  studentState.chk[cid]=!studentState.chk[cid];
+  saveStudent(); renderTracker(); swYear(parseInt(y));
+}
+
+function updateStats(){
+  const prog=programs.find(x=>x.id===studentState.progId); if(!prog) return;
+  const {chk}=studentState;
+  let total=prog.courses.length, done=0, cr=0, req=0;
+  prog.courses.forEach(c=>{
+    if(chk[c.id]){done++;cr+=c.cr;}
+    if(c.type==='required') req++;
+  });
+  const pct=total>0?Math.round((done/total)*100):0;
+  document.getElementById('t-done').textContent=done;
+  document.getElementById('t-left').textContent=total-done;
+  document.getElementById('t-cr').textContent=cr;
+  document.getElementById('t-req').textContent=req;
+  document.getElementById('t-bar').style.width=pct+'%';
+  document.getElementById('t-pct').textContent=pct+'%';
+}
+
+// ── MISSING COURSES ───────────────────────────────
+function showMissing(){
+  const prog=programs.find(x=>x.id===studentState.progId); if(!prog) return;
+  const {chk}=studentState;
+  const missing=prog.courses.filter(c=>!chk[c.id]);
+  let html='';
+  if(!missing.length){
+    html='<div class="empty"><div class="e-icon">🎉</div><p>You\'ve checked off all your courses!</p></div>';
+  } else {
+    // group by type
+    ['required','elective','general'].forEach(type=>{
+      const tc=missing.filter(c=>c.type===type);
+      if(!tc.length) return;
+      const labels={required:'Required Courses',elective:'Electives',general:'General Education'};
+      const colors={required:'var(--red)',elective:'var(--purple)',general:'var(--amber)'};
+      html+=`<div style="margin-bottom:20px">
+        <div style="font-size:.8rem;font-weight:700;color:${colors[type]};text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">${labels[type]} — ${tc.length} remaining</div>`;
+      tc.forEach(c=>{
+        html+=`<div class="missing-item">
+          <span class="missing-code">${c.code}</span>
+          <span style="flex:1">${c.name}</span>
+          <span style="font-size:.7rem;color:var(--slate);margin-left:8px">Yr ${c.year} · ${c.cr}cr</span>
+        </div>`;
+      });
+      html+='</div>';
+    });
+    html=`<p style="font-size:.82rem;font-weight:300;color:var(--slate);margin-bottom:18px">${missing.length} course${missing.length!==1?'s':''} remaining to complete your degree.</p>`+html;
+  }
+  document.getElementById('missing-content').innerHTML=html;
+  document.getElementById('missing-overlay').classList.add('open');
+}
+function closeMissing(){ document.getElementById('missing-overlay').classList.remove('open'); }
+
+// ── INIT ──────────────────────────────────────────
+load();
+</script>
+</body>
+</html>
